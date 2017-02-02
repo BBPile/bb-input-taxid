@@ -1,0 +1,53 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-validator-behavior/iron-validator-behavior.html">
+
+<script>
+  Polymer({
+    is: 'bb-input-taxid-validator-ko',
+
+    behaviors: [
+      Polymer.IronValidatorBehavior
+    ],
+    properties: {
+      delimiter: {
+        type: String,
+        value: '-'
+      },
+      valueForValidation: {
+        type: String
+      }
+    },
+    // validate the value and its date-format for birthday.
+    validate: function(value) {
+
+      var valid = false;
+
+      if (value && this.valueForValidation) {
+
+          var regexp = new RegExp(/([0-9]{3})-?([0-9]{2})-?([0-9]{5})/);
+          valid = regexp.test(this.valueForValidation)? true: false;
+          this.message = !valid ? 'error-format' : '';
+          regexp = null;
+
+          if (valid) {
+            var cVal = 0;
+            for (var i=0; i<8; i++) {
+              var cKeyNum = parseInt(((_tmp = i % 3) == 0) ? 1 : ( _tmp == 1 ) ? 3 : 7);
+              cVal += (parseFloat(value.substring(i,i+1)) * cKeyNum) % 10;
+            }
+            var li_temp = parseFloat(value.substring(i,i+1)) * 5 + '0';
+            cVal += parseFloat(li_temp.substring(0,1)) + parseFloat(li_temp.substring(1,2));
+            valid = (parseInt(value.substring(9,10)) == 10-(cVal % 10)%10);
+            this.message = !valid ? 'error-invalid' : '';
+          }
+
+          // announce error-message
+          if (!valid) {
+            this.fire('bb-input-taxid-error-message', {code: this.message});
+            return valid;
+          }
+      }
+      return valid;
+    }
+  });
+</script>

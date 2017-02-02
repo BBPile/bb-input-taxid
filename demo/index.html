@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+  <head>
+    <title>bb-input-taxid demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../bb-input-taxid.html">
+    <link rel="import" href="../../paper-button/paper-button.html">
+    <link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+    <link rel="import" href="../../iron-icons/iron-icons.html">
+    <link rel="import" href="../../iron-icons/hardware-icons.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+  </head>
+  <body>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic bb-input-taxid Demo</h3>
+      <demo-snippet>
+        <template>
+          <div class="card" >
+              <paper-button raised onclick="_loadMain">Initialization</paper-button>
+              <form is="iron-form" method="get" action="/" id="eventsDemo" >
+                <bb-input-taxid
+                      id="inputTaxId"
+                      label="TaxID"
+                      delimiter="-"
+                      show-value
+                      required
+                      error-message="invalid id"
+                      auto-validate>
+                      <iron-icon prefix icon="hardware:phone-android" ></iron-icon>
+                      <paper-icon-button class="clear" suffix icon="icons:clear" onclick="_clearInput" alt="clear" title="clear" ></paper-icon-button>
+                </bb-input-taxid>
+              </form>
+              <paper-button raised id="setValue" onclick="setValue(event)">Set TaxID</paper-button>
+              <!-- Submit and Reset for form -->
+              <paper-button raised onclick="_delayedSubmit(event)" disabled id="eventsDemoSubmit">
+                <paper-spinner id="spinner" hidden></paper-spinner>Submit</paper-button>
+              <paper-button raised onclick="_reset(event)">Reset</paper-button>
+
+              <div class="output"></div>
+          </div>
+        </template>
+      </demo-snippet>
+    </div>
+
+    <script>
+        function _loadMain() {
+          eventsDemo.addEventListener('change', function(event) {
+            // Validate the entire form to see if we should enable the `Submit` button.
+            eventsDemoSubmit.disabled = !eventsDemo.validate();
+          });
+
+          eventsDemo.addEventListener('iron-form-submit', function(event) {
+            spinner.active = false;
+            spinner.hidden = true;
+            eventsDemoSubmit.disabled = false;
+            this.querySelector('.output').innerHTML = JSON.stringify(event.detail);
+          });
+
+          document.getElementById('inputTaxId')
+          .addEventListener('bb-input-taxid-error-message',function (e) {
+            var msg = '';
+            console.log(e.detail.code); // true
+
+            if(e.detail.code == 'error-format'){
+              msg= 'Format invalid!!!';
+            }
+            else if(e.detail.code == 'error-invalid'){
+              msg= 'Value invalid';
+            } else {
+              msg = '';
+            }
+            document.getElementById('inputTaxId').setAttribute('error-message',msg);
+          });
+        }
+
+        function setValue() {
+          document.getElementById('inputTaxId').fullValue = '123-45-67891';
+
+        }
+
+        function getFullValue() {
+
+          console.log(document.getElementById('inputTaxId').fullValue) ;
+
+        }
+
+        function _clearInput(e){
+            document.getElementById('inputTaxId').fullValue = '--';
+
+        }
+
+    </script>
+  </body>
+</html>

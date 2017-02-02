@@ -1,0 +1,177 @@
+<!--
+  @license This all copyrights belong to Mr.Won,Wooseok.
+  Program     : bb-input-taxid element
+  Description : The input value has a date-format as birthday.
+                If the part of the year is invalid, error-code is 'error-year'.
+                If the part of the month is invalid, error-code is 'error-month'.
+                If the part of the day is invalid, error-code is 'error-day'.
+                If the pattern is invalid, error-code is 'error-full'.
+
+  Author      : Won Wooseok
+  Date        : 2017-01-07
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-input/paper-input-container.html">
+<link rel="import" href="../paper-input/paper-input-error.html">
+<link rel="import" href="../iron-form-element-behavior/iron-form-element-behavior.html">
+<link rel="import" href="bb-input-input-taxid.html">
+
+<dom-module id="bb-input-taxid">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+        width: 100%;
+
+        --paper-dropdown-menu-input: {
+          padding: 0 20px 0 0;
+          border: none;
+        };
+      }
+      :host([hidden]) {
+        display: none !important;
+      }
+      :host([focused]) {
+        outline: none;
+      }
+
+      bb-input-input-taxid::-webkit-input-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+
+      bb-input-input-taxid:-moz-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+
+      bb-input-input-taxid::-moz-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+
+      bb-input-input-taxid:-ms-input-placeholder {
+        color: var(--paper-input-container-color, --secondary-text-color);
+      }
+
+      label {
+        pointer-events: none;
+      }
+      p {
+        color: blue;
+      }
+    </style>
+
+
+    <paper-input-container
+          id="bbInputContainer"
+          always-float-label
+          auto-validate
+          attr-for-value="value"
+          focused="{{focused}}">
+      <content select="[prefix]"></content>
+      <label hidden$="[[!label]]" aria-hidden="true" for="inputTaxId">[[label]]</label>
+      <bb-input-input-taxid id="inputTaxId"
+            class="paper-input-input"
+            delimiter="[[delimiter]]"
+            invalid="{{invalid}}"
+            value="{{value}}"
+            required="[[required]]"
+            value-for-validation="{{fullValue}}"
+            focused="{{focused}}" ></bb-input-input-taxid>
+      <content select="[suffix]"></content>
+      <template is="dom-if" if="{{errorMessage}}">
+        <paper-input-error>{{errorMessage}}</paper-input-error>
+      </template>
+    </paper-input-container>
+
+    <template is="dom-if" if="[[showValue]]">
+      <p>Value is {{value}}</p>
+    </template>
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'bb-input-taxid',
+      behaviors: [
+        Polymer.IronFormElementBehavior
+      ],
+      properties: {
+        // note: initial value as '' to make a property invalid 'false' in the callback ready method.
+        value: {
+          type: String,
+          notify: true,
+          value: function() {
+            return '';
+          }
+        },
+        label: {
+          type: String,
+          value: 'Tax ID'
+        },
+        delimiter: {
+          type: String
+        },
+        errorMessage: {
+          type: String,
+          notify: true
+        },
+        showValue: {
+          type: Boolean,
+          value: false
+        },
+        required: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
+        },
+        fullValue: {
+          type:String,
+          notify: true,
+          observer: '_fullValueChanged'
+        }
+      },
+      _fullValueChanged: function(val, oval) {
+        // console.log('changed fullValue='+val);
+        if(val) {
+            var arr = val.split(this.delimiter);
+            if( arr ) {
+              if( arr[0] !== 'undefined')
+                this.$.inputTaxId._first = arr[0];
+              if( arr[1] !== 'undefined')
+                this.$.inputTaxId._middle = arr[1];
+              if( arr[2] !== 'undefined')
+                this.$.inputTaxId._last = arr[2];
+            }
+            arr = null;
+        }
+      },
+      validate: function() {
+        // First, check what the browser thinks. Some inputs (like type=number)
+        // behave weirdly and will set the value to "" if something invalid is
+        // entered, but will set the validity correctly.
+        var valid =  this.$.inputTaxId.$.firstInput.checkValidity();
+        var valid =  this.$.inputTaxId.$.middleInput.checkValidity();
+        var valid =  this.$.inputTaxId.$.lastInput.checkValidity();
+
+        // Only do extra checking if the browser thought this was valid.
+        if (valid) {
+          // Empty, required input is invalid
+          if (this.required && this.value === '') {
+            valid = false;
+          } else if (this.$.inputTaxId.hasValidator()) {
+            valid = Polymer.IronValidatableBehavior.validate.call(this.$.inputTaxId, this.value);
+          }
+        }
+
+        this.invalid = !valid;
+        this.fire('iron-input-validate');
+        return valid;
+      }
+
+
+    });
+  </script>
+</dom-module>
